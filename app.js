@@ -7,38 +7,41 @@ GAME RULES
 -The player can choose to HOLD, which means his round score gets added to the GLOBAL score. After that it's the next players turn
 -The first player to reach points on global score wins the game
 */
-var scores, roundScore, activePlayer, gamePlaying;
+var scores, roundScore, activePlayer, gamePlaying, previousDice;
 
 //GamePlaying is state variable----a state varible tells the condition of a system.
 
 //calling  game initialization function
 init();
 
-var previousDice;
-
-document.querySelector('.btn-roll').addEventListener('click', function () {
+document.querySelector('.btn-roll').addEventListener('click', () => {
     //Roll dice function
-
     if (gamePlaying) {
 
         //1. Generate a random number
-        let dice = Math.floor(Math.random() * 6) + 1;
+        let dice1 = Math.floor(Math.random() * 6) + 1;
+        let dice2 = Math.floor(Math.random() * 6) + 1;
+        let dice = dice1 + dice2;//adds scores for both dice
 
 
         //2. Display the result
-        let diceDOM = document.querySelector('.dice');
-        diceDOM.style.display = 'block';
-        diceDOM.src = 'dice-' + dice + '.png';
+        document.getElementById('dice-1').style.display = 'block';
+        document.getElementById('dice-2').style.display = 'block';
 
-        if (previousDice === 6 && dice === 6) {
-            //When a player gets two 6 in a row, he loses entire scores
+        document.getElementById('dice-1').src = 'dice-' + dice1 + '.png';
+        document.getElementById('dice-2').src = 'dice-' + dice2 + '.png';
+
+        if (previousDice === 12 && dice === 12) {
+            //if player gets 4 six in a row the entire score is set to zero
+            alert('Oh sorry! You got 4 six in a row');
+
             scores[activePlayer] = 0;
             document.querySelector('#score-' + activePlayer).textContent = '0';
             nextPlayer();
 
-        } else if (dice !== 1) {
+        } else if (dice1 !== 1 && dice2 !== 1) {
+            //3. Update the round score if of the roll number was NOT 1
 
-            //3. Update the round score if the roll number was NOT 1
             //add score to roundScore
             roundScore += dice;
             document.querySelector('#current-' + activePlayer).textContent = roundScore;
@@ -47,12 +50,11 @@ document.querySelector('.btn-roll').addEventListener('click', function () {
             //next player
             nextPlayer();
         }
-
         previousDice = dice;
     }
 });
 
-document.querySelector('.btn-hold').addEventListener('click', function () {
+document.querySelector('.btn-hold').addEventListener('click', () => {
 
     if (gamePlaying) {
 
@@ -61,23 +63,24 @@ document.querySelector('.btn-hold').addEventListener('click', function () {
         //Update the UI
         document.querySelector('#score-' + activePlayer).textContent = scores[activePlayer];
 
-        var input = document.querySelector('.final-score').value;
-        var winningScore;
+        let input = document.querySelector('.final-score').value;
+        let winningScore;
 
-        //undefined, 0, null or "" are COERCED to false
+        //Checks input value. undefined, 0, null or "" are COERCED to false
         //Anything else is coerced to true
 
         if (input) {
             winningScore = input;
         } else {
-            winningScore = 100;
+            winningScore = 100;//Default winning Score
         }
 
-
-        //check player won the game
+        //check if player won the game
         if (scores[activePlayer] >= winningScore) {
             document.querySelector('#name-' + activePlayer).textContent = 'Winner!';
-            document.querySelector('.dice').style.display = 'none';
+
+            hideDice();
+
             document.querySelector('.player-' + activePlayer + '-panel').classList.add('winner');
             document.querySelector('.player-' + activePlayer + '-panel').classList.remove('active');
             gamePlaying = false;
@@ -105,12 +108,17 @@ function nextPlayer() {
     document.querySelector('.player-0-panel').classList.toggle('active');
     document.querySelector('.player-1-panel').classList.toggle('active');
 
-    // document.querySelector('.player-0-panel').classList.remove('active');
-    // document.querySelector('.player-1-panel').classList.add('active');
-
-    document.querySelector('.dice').style.display = 'none';
+    hideDice();
 }
 
+//Hides the dice
+hideDice = () => {
+    document.getElementById('dice-1').style.display = 'none';
+    document.getElementById('dice-2').style.display = 'none';
+
+}
+
+//Game initialization function
 function init() {
 
     scores = [0, 0];
@@ -119,7 +127,9 @@ function init() {
     gamePlaying = true;
 
 
-    document.querySelector('.dice').style.display = 'none';
+    document.getElementById('dice-1').style.display = 'none';
+    document.getElementById('dice-2').style.display = 'none';
+
 
     document.getElementById('score-0').textContent = 0;
     document.getElementById('score-1').textContent = 0;
@@ -129,5 +139,3 @@ function init() {
     document.getElementById('name-1').innerHTML = 'Player 2';
     document.querySelector('.player-' + activePlayer + '-panel').classList.remove('winner');
 }
-
-// document.querySelector('#current-' + activePlayer).innerHTML = '<em>' + dice + '</em';
